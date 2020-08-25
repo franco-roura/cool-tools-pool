@@ -41,13 +41,15 @@ def login(driver):
     login_button.click()
 
 
-def track_hour(driver, ticket_description, date=None):
+def track_hour(driver, ticket_description, hours, date=None):
     """
     This function tracks an hour of your time.
     :param driver: The RemoteWebDriver object
     :type driver: RemoteWebDriver
     :param ticket_description: The ticket's description
     :type ticket_description: str
+    :param hours: The amount of hours worked on the ticket
+    :type hours: str
     :param date: The date if specified, otherwise it defaults as today.
     :type date: A date string in "dd/mm/YYYY" format
     :return:
@@ -59,18 +61,18 @@ def track_hour(driver, ticket_description, date=None):
         date_input.send_keys(date)
     project = driver.find_element_by_css_selector(dom_elements.TrackHours.project)
     select_project = Select(project)
-    select_project.select_by_visible_text("AdRoll - AdRoll/NextRoll")
+    select_project.select_by_visible_text(Account.project_name)
     WebDriverWait(driver, 15).until(
         visibility_of_element_located((By.CSS_SELECTOR, dom_elements.TrackHours.software_assignment))
     )
     assignment_type = driver.find_element_by_css_selector(dom_elements.TrackHours.assignment_type)
     select_assignment = Select(assignment_type)
-    select_assignment.select_by_visible_text("Software Development")
+    select_assignment.select_by_visible_text(Account.assignment_type)
     focal_point = driver.find_element_by_css_selector(dom_elements.TrackHours.focal_point)
     select_focal_point = Select(focal_point)
-    select_focal_point.select_by_visible_text("Anthony Mayer")
+    select_focal_point.select_by_visible_text(Account.client_focal_point)
     hours_input = driver.find_element_by_css_selector(dom_elements.TrackHours.hours)
-    hours_input.send_keys("1")
+    hours_input.send_keys(hours)
     description_input = driver.find_element_by_css_selector(dom_elements.TrackHours.description)
     description_input.send_keys(ticket_description)
     accept = driver.find_element_by_css_selector(dom_elements.TrackHours.accept_button)
@@ -81,10 +83,8 @@ def main():
     arguments = parse_arguments()
     driver = webdriver.Chrome(options=options)
     login(driver)
-    for hour in range(int(arguments.hours)):
-        description = arguments.description + " " + str(hour + 1)
-        track_hour(driver, description, arguments.date)
-        print("Tracked \"%s\" successfully" % description)
+    track_hour(driver, arguments.description, arguments.hours, arguments.date)
+    print("Tracked \"%s\" successfully" % arguments.description)
     driver.close()
     print("You can validate your tickets at https://timetracker.bairesdev.com/ListaTimeTracker.aspx")
 
